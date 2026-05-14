@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HipFractulator — HO Risk Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #0f2340;
+      --blue: #1a4a8a;
+      --mid: #2563a8;
+      --accent: #3b82c4;
+      --light: #e8f0fa;
+      --lighter: #f4f7fc;
+      --white: #ffffff;
+      --text: #0f2340;
+      --muted: #64748b;
+      --border: #cbd5e1;
+      --green: #166534;
+      --green-bg: #dcfce7;
+      --yellow: #92400e;
+      --yellow-bg: #fef3c7;
+      --red: #991b1b;
+      --red-bg: #fee2e2;
+      --serif: 'DM Serif Display', Georgia, serif;
+      --sans: 'DM Sans', system-ui, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--lighter);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    /* HEADER */
+    header {
+      background: var(--navy);
+      padding: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 3px solid var(--accent);
+    }
+
+    .header-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 18px 24px;
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+    }
+
+    .logo {
+      font-family: var(--serif);
+      font-size: 22px;
+      color: var(--white);
+      letter-spacing: -0.02em;
+    }
+
+    .logo span {
+      color: var(--accent);
+    }
+
+    .logo-sub {
+      font-size: 12px;
+      color: #94a3b8;
+      font-weight: 300;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+      padding: 56px 24px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 320px; height: 320px;
+      border-radius: 50%;
+      background: rgba(59,130,196,0.12);
+      pointer-events: none;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -80px; left: -40px;
+      width: 240px; height: 240px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      max-width: 680px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(59,130,196,0.25);
+      border: 1px solid rgba(59,130,196,0.5);
+      color: #93c5fd;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 100px;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: clamp(28px, 5vw, 42px);
+      color: var(--white);
+      line-height: 1.15;
+      margin-bottom: 14px;
+      letter-spacing: -0.02em;
+    }
+
+    .hero p {
+      color: #94a3b8;
+      font-size: 15px;
+      font-weight: 300;
+      max-width: 520px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* MAIN LAYOUT */
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* STUDY CONTEXT */
+    .context-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 32px;
+    }
+
+    .context-card h3 {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .context-card p {
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    .context-stats {
+      display: flex;
+      gap: 32px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-val {
+      font-family: var(--serif);
+      font-size: 22px;
+      color: var(--navy);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    /* CALCULATOR CARD */
+    .calc-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(15,35,64,0.07);
+      margin-bottom: 32px;
+    }
+
+    .calc-header {
+      background: var(--navy);
+      padding: 20px 28px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .calc-header-icon {
+      width: 36px; height: 36px;
+      background: rgba(59,130,196,0.3);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+
+    .calc-header-text h2 {
+      font-family: var(--serif);
+      font-size: 18px;
+      color: var(--white);
+      font-weight: 400;
+    }
+
+    .calc-header-text p {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    .calc-body {
+      padding: 28px;
+    }
+
+    /* SECTION LABELS */
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* PREDICTOR ROWS */
+    .predictors {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-bottom: 28px;
+    }
+
+    .predictor-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid #f1f5f9;
+      gap: 16px;
+    }
+
+    .predictor-row:last-child {
+      border-bottom: none;
+    }
+
+    .predictor-info {
+      flex: 1;
+    }
+
+    .predictor-label {
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .predictor-or {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .toggle-group {
+      display: flex;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .toggle-btn {
+      padding: 7px 18px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: var(--sans);
+      border: none;
+      background: var(--white);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .toggle-btn:first-child {
+      border-right: 1.5px solid var(--border);
+    }
+
+    .toggle-btn.active-no {
+      background: var(--lighter);
+      color: var(--text);
+    }
+
+    .toggle-btn.active-yes {
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    /* CALCULATE BUTTON */
+    .calc-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--blue), var(--mid));
+      color: var(--white);
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: var(--sans);
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(26,74,138,0.35);
+    }
+
+    .calc-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(26,74,138,0.4);
+    }
+
+    .calc-btn:active {
+      transform: translateY(0);
+    }
+
+    /* RESULT */
+    .result-section {
+      margin-top: 28px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .result-section.visible {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .result-card {
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .result-card.low {
+      background: var(--green-bg);
+      border: 1.5px solid #86efac;
+    }
+
+    .result-card.moderate {
+      background: var(--yellow-bg);
+      border: 1.5px solid #fcd34d;
+    }
+
+    .result-card.high {
+      background: var(--red-bg);
+      border: 1.5px solid #fca5a5;
+    }
+
+    .result-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .result-card.low .result-label { color: var(--green); }
+    .result-card.moderate .result-label { color: var(--yellow); }
+    .result-card.high .result-label { color: var(--red); }
+
+    .result-probability {
+      font-family: var(--serif);
+      font-size: 52px;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .result-card.low .result-probability { color: var(--green); }
+    .result-card.moderate .result-probability { color: var(--yellow); }
+    .result-card.high .result-probability { color: var(--red); }
+
+    .result-description {
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .result-card.low .result-description { color: #14532d; }
+    .result-card.moderate .result-description { color: #78350f; }
+    .result-card.high .result-description { color: #7f1d1d; }
+
+    /* RISK BAR */
+    .risk-bar-wrap {
+      margin: 20px 0 4px;
+    }
+
+    .risk-bar-track {
+      height: 8px;
+      background: linear-gradient(to right, #86efac, #fcd34d, #fca5a5);
+      border-radius: 100px;
+      position: relative;
+      margin-bottom: 6px;
+    }
+
+    .risk-bar-marker {
+      width: 16px; height: 16px;
+      background: var(--navy);
+      border: 2.5px solid var(--white);
+      border-radius: 50%;
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      transition: left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .risk-bar-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* ACTIVE PREDICTORS */
+    .active-predictors {
+      margin-top: 16px;
+      padding: 14px 16px;
+      background: rgba(15,35,64,0.04);
+      border-radius: 8px;
+    }
+
+    .active-predictors-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .active-predictor-tag {
+      display: inline-block;
+      background: var(--navy);
+      color: var(--white);
+      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      margin: 3px 3px 3px 0;
+    }
+
+    .no-factors {
+      font-size: 13px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* RADIATION RECOMMENDATION */
+    .recommendation {
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin-top: 16px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .recommendation.consider {
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+    }
+
+    .recommendation.routine {
+      background: #fee2e2;
+      border: 1px solid #fca5a5;
+    }
+
+    .recommendation.not-indicated {
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+    }
+
+    .rec-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .rec-text strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+
+    .rec-text p {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--text);
+    }
+
+    /* METHODOLOGY */
+    .method-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 24px;
+    }
+
+    .method-card h3 {
+      font-family: var(--serif);
+      font-size: 18px;
+      color: var(--navy);
+      margin-bottom: 12px;
+      font-weight: 400;
+    }
+
+    .method-card p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 10px;
+    }
+
+    .method-card p:last-child { margin-bottom: 0; }
+
+    .coeff-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 14px;
+    }
+
+    .coeff-table th {
+      text-align: left;
+      padding: 8px 12px;
+      background: var(--lighter);
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .coeff-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #f1f5f9;
+      color: var(--text);
+    }
+
+    .coeff-table tr:last-child td { border-bottom: none; }
+
+    .coeff-table td:last-child {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: var(--blue);
+    }
+
+    /* DISCLAIMER */
+    .disclaimer {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 22px;
+      margin-bottom: 24px;
+    }
+
+    .disclaimer h4 {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .disclaimer p {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    /* FOOTER */
+    footer {
+      background: var(--navy);
+      padding: 32px 24px;
+      text-align: center;
+    }
+
+    .footer-inner {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    footer p {
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.7;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .footer-name {
+      font-family: var(--serif);
+      font-size: 16px;
+      color: #94a3b8;
+      margin-bottom: 8px;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 540px) {
+      .context-stats { gap: 20px; }
+      .calc-body { padding: 20px; }
+      .predictor-label { font-size: 14px; }
+      .toggle-btn { padding: 7px 14px; }
+      .result-probability { font-size: 40px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hero">
+    <div class="hero-inner">
+      <h1>Heterotopic Ossification Risk<br>After Posterior Acetabular Fixation</h1>
+    </div>
+  </div>
+
+  <main>
+
+    <div class="context-card">
+      <p>This tool estimates the likelihood of heterotopic ossification formation after acetabular fracture fixation through a posterior approach. It is derived from a retrospective multicenter cohort of 1,288 adult patients treated without HO prophylaxis.</p>
+    </div>
+
+    <div class="calc-card">
+      <div class="calc-header">
+        <div class="calc-header-icon">⚕</div>
+        <div class="calc-header-text">
+          <h2>HO Risk Calculator</h2>
+          <p>Kocher-Langenbeck approach · No prophylaxis baseline</p>
+        </div>
+      </div>
+
+      <div class="calc-body">
+        <div class="section-label">Risk Factors — select all that apply</div>
+
+        <div class="predictors">
+
+          <div class="predictor-row">
+            <div class="predictor-info">
+              <div class="predictor-label">Severe head injury</div>
+            </div>
+            <div class="toggle-group">
+              <button class="toggle-btn active-no" onclick="toggle(this, 'head')" data-key="head" data-val="0">No</button>
+              <button class="toggle-btn" onclick="toggle(this, 'head')" data-key="head" data-val="1">Yes</button>
+            </div>
+          </div>
+
+          <div class="predictor-row">
+            <div class="predictor-info">
+              <div class="predictor-label">Ventilator dependence &gt; 3 days</div>
+            </div>
+            <div class="toggle-group">
+              <button class="toggle-btn active-no" onclick="toggle(this, 'vent')" data-key="vent" data-val="0">No</button>
+              <button class="toggle-btn" onclick="toggle(this, 'vent')" data-key="vent" data-val="1">Yes</button>
+            </div>
+          </div>
+
+          <div class="predictor-row">
+            <div class="predictor-info">
+              <div class="predictor-label">Spinal cord injury</div>
+            </div>
+            <div class="toggle-group">
+              <button class="toggle-btn active-no" onclick="toggle(this, 'sci')" data-key="sci" data-val="0">No</button>
+              <button class="toggle-btn" onclick="toggle(this, 'sci')" data-key="sci" data-val="1">Yes</button>
+            </div>
+          </div>
+
+          <div class="predictor-row">
+            <div class="predictor-info">
+              <div class="predictor-label">African-American race</div>
+            </div>
+            <div class="toggle-group">
+              <button class="toggle-btn active-no" onclick="toggle(this, 'aa')" data-key="aa" data-val="0">No</button>
+              <button class="toggle-btn" onclick="toggle(this, 'aa')" data-key="aa" data-val="1">Yes</button>
+            </div>
+          </div>
+
+          <div class="predictor-row">
+            <div class="predictor-info">
+              <div class="predictor-label">Dual surgical approach</div>
+            </div>
+            <div class="toggle-group">
+              <button class="toggle-btn active-no" onclick="toggle(this, 'dual')" data-key="dual" data-val="0">No</button>
+              <button class="toggle-btn" onclick="toggle(this, 'dual')" data-key="dual" data-val="1">Yes</button>
+            </div>
+          </div>
+
+        </div>
+
+        <button class="calc-btn" onclick="calculate()">Calculate HO Risk →</button>
+
+        <div class="result-section" id="result">
+          <hr class="result-divider" />
+
+          <div class="section-label">Result</div>
+
+          <div id="result-card" class="result-card low">
+            <div class="result-label" id="result-tier">Low Risk</div>
+            <div class="result-probability" id="result-pct">—</div>
+            <div class="result-description" id="result-desc"></div>
+
+            <div class="risk-bar-wrap">
+              <div class="risk-bar-track">
+                <div class="risk-bar-marker" id="bar-marker" style="left:5%"></div>
+              </div>
+              <div class="risk-bar-labels">
+                <span>0%</span>
+                <span>Severe HO Risk</span>
+                <span>50%+</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="active-preds" class="active-predictors">
+            <div class="active-predictors-label">Active risk factors</div>
+            <div id="pred-tags"></div>
+          </div>
+
+          <div id="recommendation" class="recommendation not-indicated">
+            <div class="rec-icon" id="rec-icon">✓</div>
+            <div class="rec-text">
+              <strong id="rec-title"></strong>
+              <p id="rec-body"></p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- DISCLAIMER -->
+    <div class="disclaimer">
+      <h4>Clinical Disclaimer</h4>
+      <p>This calculator is intended to support, not replace, clinical judgment. Predicted probabilities are derived from a retrospective two-center cohort and have not yet been externally validated in an independent prospective dataset. Risk estimates should be interpreted in the context of individual patient circumstances, surgeon experience, and institutional resources. Race is included as a predictor variable based on its independent statistical association in the derivation cohort; its biological basis requires further investigation. This tool does not constitute medical advice and should not be used as the sole basis for clinical decision-making.</p>
+    </div>
+
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-name">HipFractulator</div>
+      <p>Developed by P. Mitchell MD MSCI · Vanderbilt University Medical Center<br>
+      Part of an ongoing prospective multicenter validation program.<br>
+      For research inquiries contact <a href="mailto:">vanderbilt.edu</a></p>
+    </div>
+  </footer>
+
+  <script>
+    // Model coefficients
+    const INTERCEPT = -4.2258;
+    const COEFFS = {
+      head: 0.7739,
+      vent: 1.7201,
+      sci:  1.7999,
+      aa:   1.4618,
+      dual: 1.6675
+    };
+
+    const LABELS = {
+      head: 'Severe head injury',
+      vent: 'Ventilator > 3 days',
+      sci:  'Spinal cord injury',
+      aa:   'African-American race',
+      dual: 'Dual approach'
+    };
+
+    // State
+    const state = { head: 0, vent: 0, sci: 0, aa: 0, dual: 0 };
+
+    function toggle(btn, key) {
+      const group = btn.parentElement;
+      const buttons = group.querySelectorAll('.toggle-btn');
+      buttons.forEach(b => {
+        b.classList.remove('active-no', 'active-yes');
+      });
+      const val = parseInt(btn.dataset.val);
+      state[key] = val;
+      if (val === 0) btn.classList.add('active-no');
+      else btn.classList.add('active-yes');
+      // Auto-recalculate if result is visible
+      if (document.getElementById('result').classList.contains('visible')) {
+        calculate();
+      }
+    }
+
+    function calculate() {
+      // Logistic regression
+      let z = INTERCEPT;
+      for (const key in COEFFS) {
+        z += state[key] * COEFFS[key];
+      }
+      const prob = 1 / (1 + Math.exp(-z));
+      const pct = (prob * 100).toFixed(1);
+
+      // Show result
+      const resultSection = document.getElementById('result');
+      resultSection.classList.add('visible');
+
+      // Update probability display
+      document.getElementById('result-pct').textContent = pct + '%';
+
+      // Risk tier
+      const card = document.getElementById('result-card');
+      const tierEl = document.getElementById('result-tier');
+      const descEl = document.getElementById('result-desc');
+      card.className = 'result-card';
+
+      if (prob < 0.10) {
+        card.classList.add('low');
+        tierEl.textContent = 'Low Risk';
+        descEl.textContent = 'Predicted probability of severe HO (Brooker III–IV) is low. Routine prophylactic radiation is unlikely to provide meaningful benefit relative to its risks in this patient.';
+      } else if (prob < 0.20) {
+        card.classList.add('moderate');
+        tierEl.textContent = 'Moderate Risk';
+        descEl.textContent = 'Predicted probability of severe HO is moderate. Clinical judgment regarding prophylactic radiation should incorporate patient-specific factors and institutional protocol.';
+      } else {
+        card.classList.add('high');
+        tierEl.textContent = 'High Risk';
+        descEl.textContent = 'Predicted probability of severe HO is high. Prophylactic radiation should be strongly considered in this patient given the substantially elevated risk profile.';
+      }
+
+      // Risk bar
+      const markerPct = Math.min(prob * 150, 98);
+      document.getElementById('bar-marker').style.left = markerPct + '%';
+
+      // Active predictors
+      const tagsEl = document.getElementById('pred-tags');
+      const active = Object.keys(state).filter(k => state[k] === 1);
+      if (active.length === 0) {
+        tagsEl.innerHTML = '<span class="no-factors">No risk factors present</span>';
+      } else {
+        tagsEl.innerHTML = active.map(k =>
+          `<span class="active-predictor-tag">${LABELS[k]}</span>`
+        ).join('');
+      }
+
+      // Recommendation
+      const rec = document.getElementById('recommendation');
+      const recIcon = document.getElementById('rec-icon');
+      const recTitle = document.getElementById('rec-title');
+      const recBody = document.getElementById('rec-body');
+      rec.className = 'recommendation';
+
+      if (prob < 0.10) {
+        rec.classList.add('not-indicated');
+        recIcon.textContent = '✓';
+        recTitle.textContent = 'Prophylactic radiation not indicated';
+        recBody.textContent = 'Based on this risk profile, the evidence supports a selective approach. Routine radiation prophylaxis should be reconsidered to minimize morbidity from unnecessary radiation exposure.';
+      } else if (prob < 0.20) {
+        rec.classList.add('consider');
+        recIcon.textContent = '⚠';
+        recTitle.textContent = 'Consider prophylactic radiation';
+        recBody.textContent = 'This patient has a moderate predicted risk. The decision regarding prophylactic radiation should involve shared discussion of risks and benefits with consideration of patient-specific factors.';
+      } else {
+        rec.classList.add('routine');
+        recIcon.textContent = '!';
+        recTitle.textContent = 'Prophylactic radiation strongly consider';
+        recBody.textContent = 'This patient has a high predicted probability of severe HO. The risk-benefit calculation supports prophylactic radiation. Coordinate with radiation oncology as part of perioperative planning.';
+      }
+
+      // Scroll to result
+      resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  </script>
+
+</body>
+</html>
